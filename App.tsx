@@ -1,22 +1,38 @@
 import { StatusBar } from 'expo-status-bar';
-import { VFC } from 'react';
+import { useEffect, useState, VFC } from 'react';
 import { FlatList, SafeAreaView, StyleSheet, View } from 'react-native';
 import ListItem from './components/ListItem';
-import articles from './dummy/articles.json';
+import dummyArticles from './dummy/articles.json';
+import Constants from 'expo-constants';
+import axios from 'axios';
 
 type Props = {
   urlToImage: string;
   title: string;
   author: string;
   publishedAt: string;
-}
+};
 
-type ItemProps = {
-  item: Props
-}
+const URL = `https://newsapi.org/v2/top-headlines?country=jp&category=business&apiKey=${Constants.manifest.extra.newsApiKey}`;
 
 export default function App() {
-  const renderItem: VFC<ItemProps> = ({ item }) => (
+  const [articles, setArticles] = useState([]);
+
+  useEffect(() => {
+    fetchArticles();
+  }, []);
+
+  const fetchArticles = async () => {
+    try {
+      const res = await axios.get(URL);
+      setArticles(res.data.articles);
+      console.error(res);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const renderItem = ({ item }: { item: Props }) => (
     <ListItem
       imageUrl={item.urlToImage}
       title={item.title}
