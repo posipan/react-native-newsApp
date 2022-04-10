@@ -5,6 +5,8 @@ import Constants from 'expo-constants';
 import axios from 'axios';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Article } from '../types/article';
+import { Loading } from '../components/Loading';
+import { RouteProp } from '@react-navigation/native';
 
 type RootStackParamList = {
   Home: undefined;
@@ -14,25 +16,28 @@ type RootStackParamList = {
 
 type Props = {
   navigation: StackNavigationProp<RootStackParamList, 'Home'>;
-  // route: RouteProp<RootStackParamList, "Home">;
+  route: RouteProp<RootStackParamList, "Home">;
 };
 
 const URL = `https://newsapi.org/v2/top-headlines?country=jp&category=business&apiKey=${Constants.manifest.extra.newsApiKey}`;
 
-export const HomeScreen: VFC<Props> = ({ navigation }: Props) => {
+export const HomeScreen: VFC<Props> = ({ navigation, route }: Props) => {
   const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchArticles();
   }, []);
 
   const fetchArticles = async () => {
+    setLoading(true);
     try {
       const res = await axios.get(URL);
       setArticles(res.data.articles);
     } catch (error) {
       console.error(error);
     }
+    setLoading(false);
   };
 
   const renderItem = ({ item }: { item: Article }) => (
@@ -51,6 +56,7 @@ export const HomeScreen: VFC<Props> = ({ navigation }: Props) => {
         renderItem={renderItem}
         keyExtractor={(item, index) => index.toString()}
       />
+      {loading && <Loading />}
     </SafeAreaView>
   );
 };
